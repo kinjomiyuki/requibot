@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用件定義チャット | RequiBot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ========== TOP PAGE ========== -->
+  <div id="top-page" class="page active">
+    <div class="top-bg">
+      <div class="top-noise"></div>
+    </div>
+    <main class="top-main">
+      <header class="top-header">
+        <div class="logo">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>RequiBot</span>
+        </div>
+        <p class="tagline">チャットで用件定義を整理 → 設計書まで自動生成</p>
+      </header>
+
+      <section class="mode-select">
+        <h2 class="mode-select__title">どちらの用件定義を始めますか？</h2>
+        <div class="mode-cards">
+
+          <button class="mode-card mode-card--web" onclick="startChat('web')">
+            <div class="mode-card__icon">
+              <i class="fa-solid fa-globe"></i>
+            </div>
+            <div class="mode-card__body">
+              <h3>Webサイト</h3>
+              <p>コーポレートサイト・LP・ポートフォリオ・ECサイトなど、ブラウザで閲覧するWebサイトの用件を整理します</p>
+              <ul class="mode-card__tags">
+                <li><i class="fa-solid fa-tag"></i>目的・ゴール</li>
+                <li><i class="fa-solid fa-tag"></i>ターゲット</li>
+                <li><i class="fa-solid fa-tag"></i>ページ構成</li>
+                <li><i class="fa-solid fa-tag"></i>デザイン方針</li>
+              </ul>
+            </div>
+            <div class="mode-card__arrow">
+              <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          </button>
+
+          <button class="mode-card mode-card--app" onclick="startChat('app')">
+            <div class="mode-card__icon">
+              <i class="fa-solid fa-cubes"></i>
+            </div>
+            <div class="mode-card__body">
+              <h3>アプリ / システム</h3>
+              <p>スマホアプリ・業務システム・SaaSなど、機能とデータを持つアプリケーション/システムの用件を整理します</p>
+              <ul class="mode-card__tags">
+                <li><i class="fa-solid fa-tag"></i>機能要件</li>
+                <li><i class="fa-solid fa-tag"></i>非機能要件</li>
+                <li><i class="fa-solid fa-tag"></i>データ設計</li>
+                <li><i class="fa-solid fa-tag"></i>制約・前提</li>
+              </ul>
+            </div>
+            <div class="mode-card__arrow">
+              <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          </button>
+
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ========== CHAT PAGE ========== -->
+  <div id="chat-page" class="page">
+    <div class="chat-layout">
+
+      <!-- Sidebar -->
+      <aside class="chat-sidebar" id="chat-sidebar">
+        <div class="sidebar-header">
+          <div class="logo logo--small">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>RequiBot</span>
+          </div>
+          <button class="btn-icon" onclick="goTop()" title="トップへ戻る">
+            <i class="fa-solid fa-house"></i>
+          </button>
+        </div>
+
+        <div class="sidebar-mode" id="sidebar-mode-badge"></div>
+
+        <div class="sidebar-progress">
+          <div class="progress-label">
+            <span>進捗</span>
+            <span id="progress-text">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+
+        <nav class="sidebar-sections" id="sidebar-sections"></nav>
+
+        <div class="sidebar-actions">
+          <button class="btn-action btn-action--primary" onclick="openExportModal()" id="btn-export">
+            <i class="fa-solid fa-file-pdf"></i>
+            用件定義書を出力
+          </button>
+          <button class="btn-action btn-action--design" onclick="openDesignModal()" id="btn-design">
+            <i class="fa-solid fa-drafting-compass"></i>
+            設計書を生成
+          </button>
+          <button class="btn-action btn-action--secondary" onclick="resetChat()">
+            <i class="fa-solid fa-rotate-left"></i>
+            リセット
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main chat area -->
+      <div class="chat-main">
+        <header class="chat-header">
+          <button class="btn-icon sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <h1 class="chat-title" id="chat-title"></h1>
+          <button class="btn-icon light" onclick="openExportModal()" title="PDF / Markdown 出力">
+            <i class="fa-solid fa-file-arrow-down"></i>
+          </button>
+        </header>
+
+        <div class="chat-messages" id="chat-messages"></div>
+
+        <div class="chat-input-area">
+          <div class="suggestions-row" id="suggestions-row"></div>
+          <div class="input-row">
+            <textarea
+              id="user-input"
+              class="chat-textarea"
+              placeholder="回答を入力してください…"
+              rows="1"
+              onkeydown="handleKey(event)"
+              oninput="autoResize(this)"
+            ></textarea>
+            <button class="btn-send" id="btn-send" onclick="sendMessage()">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+          <p class="input-hint">Enter で送信 / Shift+Enter で改行</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== EXPORT MODAL ========== -->
+  <div class="modal-overlay" id="export-modal" onclick="onExportOverlayClick(event)">
+    <div class="modal modal--export">
+      <header class="modal-header">
+        <h2><i class="fa-solid fa-file-arrow-down"></i> 用件定義書を出力</h2>
+        <button class="btn-icon" onclick="closeExportModal()"><i class="fa-solid fa-xmark"></i></button>
+      </header>
+
+      <!-- タブ -->
+      <div class="export-tabs">
+        <button class="export-tab active" id="tab-pdf" onclick="switchExportTab('pdf')">
+          <i class="fa-solid fa-file-pdf"></i> PDF
+        </button>
+        <button class="export-tab" id="tab-md" onclick="switchExportTab('md')">
+          <i class="fa-solid fa-file-code"></i> Markdown
+        </button>
+      </div>
+
+      <!-- PDF タブ -->
+      <div class="export-panel" id="panel-pdf">
+        <div class="pdf-preview-wrap">
+          <div id="pdf-preview-pages" class="pdf-preview-pages"></div>
+        </div>
+        <footer class="modal-footer">
+          <button class="btn-action btn-action--primary" id="btn-download-pdf" onclick="downloadPDF()">
+            <i class="fa-solid fa-download"></i> PDFをダウンロード
+          </button>
+          <button class="btn-action btn-action--secondary" onclick="closeExportModal()">閉じる</button>
+        </footer>
+      </div>
+
+      <!-- Markdown タブ -->
+      <div class="export-panel hidden" id="panel-md">
+        <div class="modal-body">
+          <pre id="export-content" class="export-pre"></pre>
+        </div>
+        <footer class="modal-footer">
+          <button class="btn-action btn-action--primary" onclick="copyToClipboard()">
+            <i class="fa-solid fa-copy"></i> コピー
+          </button>
+          <button class="btn-action btn-action--secondary" onclick="closeExportModal()">閉じる</button>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 設計書モーダル ========== -->
+  <div class="modal-overlay" id="design-modal" onclick="onDesignOverlayClick(event)">
+    <div class="modal modal--export modal--design">
+      <header class="modal-header">
+        <h2><i class="fa-solid fa-drafting-compass"></i> 設計書を生成</h2>
+        <button class="btn-icon" onclick="closeDesignModal()"><i class="fa-solid fa-xmark"></i></button>
+      </header>
+
+      <!-- タブ -->
+      <div class="export-tabs">
+        <button class="export-tab active" id="dtab-preview" onclick="switchDesignTab('preview')">
+          <i class="fa-solid fa-eye"></i> プレビュー
+        </button>
+        <button class="export-tab" id="dtab-md" onclick="switchDesignTab('md')">
+          <i class="fa-solid fa-file-code"></i> Markdown
+        </button>
+      </div>
+
+      <!-- プレビュータブ -->
+      <div class="export-panel" id="dpanel-preview">
+        <div class="design-info-banner" id="design-info-banner">
+          <i class="fa-solid fa-circle-info"></i>
+          用件定義の回答をもとに設計書を自動生成します。未回答の項目は空欄になります。
+        </div>
+        <div class="pdf-preview-wrap">
+          <div id="design-preview-pages" class="pdf-preview-pages"></div>
+        </div>
+        <footer class="modal-footer">
+          <button class="btn-action btn-action--design-dl" id="btn-download-design-pdf" onclick="downloadDesignPDF()">
+            <i class="fa-solid fa-download"></i> 設計書PDFをダウンロード
+          </button>
+          <button class="btn-action btn-action--secondary" onclick="closeDesignModal()">閉じる</button>
+        </footer>
+      </div>
+
+      <!-- Markdown タブ -->
+      <div class="export-panel hidden" id="dpanel-md">
+        <div class="modal-body">
+          <pre id="design-md-content" class="export-pre"></pre>
+        </div>
+        <footer class="modal-footer">
+          <button class="btn-action btn-action--design-dl" onclick="copyDesignMarkdown()">
+            <i class="fa-solid fa-copy"></i> コピー
+          </button>
+          <button class="btn-action btn-action--secondary" onclick="closeDesignModal()">閉じる</button>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PDF RENDER TARGET (off-screen) ========== -->
+  <div id="pdf-render-root" aria-hidden="true"></div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <script src="js/questions.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/design.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>
