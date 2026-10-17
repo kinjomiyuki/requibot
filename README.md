@@ -2,6 +2,21 @@
 
 > チャット形式Q&Aで用件を整理し、**用件定義書PDF** と **設計書PDF** を自動生成・ダウンロードできるツール。
 
+**Live:** https://kinjomiyuki.github.io/requibot/
+
+## Tech Stack
+
+| Area | Tech |
+|---|---|
+| UI | HTML / CSS / JavaScript(ビルド不要) |
+| PDF 出力 | jsPDF, html2canvas |
+| Icons | Font Awesome |
+| Hosting | GitHub Pages |
+
+## Getting Started
+
+`index.html` をブラウザで開くだけで動きます。
+
 ---
 
 ## 🌟 実装済み機能
